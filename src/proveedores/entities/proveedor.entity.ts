@@ -9,19 +9,19 @@ export class Proveedor {
     @Column()
     nombre: string;
 
-    @Column()
+    @Column({ nullable: true })
     rut: string;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     razon_social: string;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     direccion: string;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     telefono: string;
 
-    @Column({ nullable: true})
+    @Column({ nullable: true })
     email: string;
 
     @OneToMany(() => Gasto, (gasto) => gasto.proveedor)

@@ -1087,20 +1087,45 @@ async obtenerPendientes() {
     // 1. Definimos claramente la lista de estados permitidos
     const estadosPermitidos = ['pagado', 'pendiente', 'cancelado'];
 
+    console.log('🕐 Parámetros recibidos - desde:', desde, 'hasta:', hasta, 'mesaId:', mesaId);
+    
     if (!desde && !hasta) {
+      // Usar fecha actual en zona horaria de Chile (UTC-4)
       const diaDeHoy = new Date();
-      inicio = new Date(diaDeHoy);
+      // Ajustar a zona horaria Chile
+      const offsetChile = -4; // UTC-4 para Chile
+      const chileTime = new Date(diaDeHoy.getTime() + (offsetChile * 60 * 60 * 1000));
+      
+      inicio = new Date(chileTime);
       inicio.setHours(0, 0, 0, 0);
+      // Ajustar de vuelta a UTC
+      inicio = new Date(inicio.getTime() - (offsetChile * 60 * 60 * 1000));
 
-      fin = new Date(diaDeHoy);
+      fin = new Date(chileTime);
       fin.setHours(23, 59, 59, 999);
+      // Ajustar de vuelta a UTC
+      fin = new Date(fin.getTime() - (offsetChile * 60 * 60 * 1000));
+      
+      console.log('🕐 Usando fecha actual - inicio:', inicio.toISOString(), 'fin:', fin.toISOString());
     } else {
       // Corrección importante: Asegurar que las fechas string se conviertan bien
-      inicio = new Date(desde);
-      inicio.setHours(0, 0, 0, 0); // Asegura inicio del día
-
-      fin = new Date(hasta);
-      fin.setHours(23, 59, 59, 999); // Asegura que tome TODO el día final
+      // Usamos la fecha local para evitar problemas de zona horaria
+      const [desdeYear, desdeMonth, desdeDay] = desde.split('-').map(Number);
+      const [hastaYear, hastaMonth, hastaDay] = hasta.split('-').map(Number);
+      
+      // Crear fechas en zona horaria local
+      inicio = new Date(desdeYear, desdeMonth - 1, desdeDay, 0, 0, 0, 0);
+      fin = new Date(hastaYear, hastaMonth - 1, hastaDay, 23, 59, 59, 999);
+      
+      console.log('🕐 Fechas locales antes de ajuste - inicio:', inicio.toString(), 'fin:', fin.toString());
+      console.log('🕐 Fechas en ISO antes de ajuste - inicio:', inicio.toISOString(), 'fin:', fin.toISOString());
+      
+      // Ajustar a UTC sumando el offset de Chile (-4 horas)
+      const offsetChile = -4; // UTC-4 para Chile
+      inicio = new Date(inicio.getTime() + (offsetChile * 60 * 60 * 1000));
+      fin = new Date(fin.getTime() + (offsetChile * 60 * 60 * 1000));
+      
+      console.log('🕐 Fechas ajustadas a UTC - inicio:', inicio.toISOString(), 'fin:', fin.toISOString());
     }
 
     const query = this.orderRepository

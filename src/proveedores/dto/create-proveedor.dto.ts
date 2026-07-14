@@ -1,4 +1,17 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments, Validate } from 'class-validator';
+
+@ValidatorConstraint({ name: 'isEmailOrEmpty', async: false })
+export class IsEmailOrEmptyConstraint implements ValidatorConstraintInterface {
+  validate(text: string, args: ValidationArguments) {
+    if (!text || text === '') return true;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text);
+  }
+
+  defaultMessage(args: ValidationArguments) {
+    return 'email must be an email';
+  }
+}
 
 export class CreateProveedorDto {
     @IsString()
@@ -6,8 +19,8 @@ export class CreateProveedorDto {
     nombre: string;
 
     @IsString()
-    @IsNotEmpty()
-    rut: string;
+    @IsOptional()
+    rut?: string;
 
     @IsString()
     @IsOptional()
@@ -21,7 +34,8 @@ export class CreateProveedorDto {
     @IsOptional()
     telefono?: string;
 
-    @IsEmail()
+    @Validate(IsEmailOrEmptyConstraint)
     @IsOptional()
+    @IsString()
     email?: string;
 }
