@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsString, IsInt, IsArray } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, IsInt, IsArray } from 'class-validator';
 
 export class UpdateProductDto {
   @IsOptional()
@@ -25,5 +25,13 @@ export class UpdateProductDto {
   @Type(() => Number)
   @IsInt({ each: true, message: 'Cada categoría debe ser un número' })
   categories?: number[];
+
+  @IsOptional()
+  @IsBoolean()
+  ofreceLocal?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  ofreceDelivery?: boolean;
 }
 

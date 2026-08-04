@@ -76,9 +76,37 @@ export class ProductsService {
 
     const updatedData: any = { ...body };
 
+    console.log('🔍 Debug - updateImage - Datos recibidos:', {
+      body,
+      productId: id,
+      currentProduct: {
+        ofreceLocal: product.ofreceLocal,
+        ofreceDelivery: product.ofreceDelivery
+      }
+    });
+
     // 🔹 Convertir valores
     if (updatedData.price) updatedData.price = Number(updatedData.price);
     updatedData.cantidad = updatedData.cantidad ?? product.cantidad ?? 0;
+
+    // 🔹 Convertir campos booleanos
+    if (updatedData.ofreceLocal !== undefined) {
+      updatedData.ofreceLocal = updatedData.ofreceLocal === 'true' || updatedData.ofreceLocal === true;
+    } else {
+      // Si no se envía el campo, mantener el valor actual del producto
+      updatedData.ofreceLocal = product.ofreceLocal;
+    }
+    if (updatedData.ofreceDelivery !== undefined) {
+      updatedData.ofreceDelivery = updatedData.ofreceDelivery === 'true' || updatedData.ofreceDelivery === true;
+    } else {
+      // Si no se envía el campo, mantener el valor actual del producto
+      updatedData.ofreceDelivery = product.ofreceDelivery;
+    }
+
+    console.log('🔍 Debug - updateImage - Valores finales a guardar:', {
+      ofreceLocal: updatedData.ofreceLocal,
+      ofreceDelivery: updatedData.ofreceDelivery
+    });
 
     // 🔹 Sincronizar categorías (eliminar las anteriores y asignar nuevas)
     if (Array.isArray(updatedData.categories)) {
@@ -157,6 +185,8 @@ export class ProductsService {
     return {
       ...product,
       imageUrl: this.sanitizeImageUrl(product.imageUrl),
+      ofreceLocal: product.ofreceLocal,
+      ofreceDelivery: product.ofreceDelivery,
     };
   }
 
@@ -187,13 +217,15 @@ export class ProductsService {
       totalPages: Math.max(1, Math.ceil(total / limit)),
       limit,
       data: products.map(
-        ({ id, name, description, price, imageUrl, categories }) => {
+        ({ id, name, description, price, imageUrl, categories, ofreceLocal, ofreceDelivery }) => {
           return {
             id,
             name,
             description,
             price,
             imageUrl: this.sanitizeImageUrl(imageUrl),
+            ofreceLocal,
+            ofreceDelivery,
             // 👇 devolver array de categorías en lugar de solo la primera
             categories: categories.map((cat) => ({
               id: cat.id,
@@ -212,12 +244,14 @@ export class ProductsService {
       order: { id: 'DESC' },
     });
 
-    return products.map(({ id, name, description, price, imageUrl, categories }) => ({
+    return products.map(({ id, name, description, price, imageUrl, categories, ofreceLocal, ofreceDelivery }) => ({
       id,
       name,
       description,
       price,
       imageUrl: this.sanitizeImageUrl(imageUrl),
+      ofreceLocal,
+      ofreceDelivery,
       categories: categories.map((cat) => ({
         id: cat.id,
         nombre: cat.nombre,
@@ -302,6 +336,8 @@ export class ProductsService {
         description: producto.description,
         price: producto.price,
         imageUrl: includeImages ? this.sanitizeImageUrl(producto.imageUrl) : null,
+        ofreceLocal: producto.ofreceLocal,
+        ofreceDelivery: producto.ofreceDelivery,
         categories: producto.categories?.map((cat) => ({
           id: cat.id,
           nombre: cat.nombre,
@@ -352,6 +388,8 @@ export class ProductsService {
       description: producto.description,
       price: producto.price,
       imageUrl: this.sanitizeImageUrl(producto.imageUrl),
+      ofreceLocal: producto.ofreceLocal,
+      ofreceDelivery: producto.ofreceDelivery,
       categories: producto.categories.map((cat) => ({
         id: cat.id,
         nombre: cat.nombre,

@@ -15,6 +15,9 @@ async function bootstrap() {
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.set('trust proxy', true); // ✅ aquí funciona
 
+  // Configurar archivos estáticos ANTES del prefijo global
+  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+
   app.setGlobalPrefix("api/v1");
 
   app.enableCors({
@@ -31,7 +34,6 @@ async function bootstrap() {
     }),
   );
 
-  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
   await app.listen(3000, '0.0.0.0');
 
 

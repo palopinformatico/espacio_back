@@ -31,6 +31,12 @@ export class Product {
   @Column({ nullable: true })
   imageUrl: string;
 
+  @Column({ default: true })
+  ofreceLocal: boolean;
+
+  @Column({ default: true })
+  ofreceDelivery: boolean;
+
   // 👇 Relación muchos a muchos con categorías
   @ManyToMany(() => Category, { eager: true })
   @JoinTable({

@@ -13,7 +13,15 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
 
   @Put(':id')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, callback) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        callback(null, 'image-' + uniqueSuffix + extname(file.originalname));
+      },
+    }),
+  }))
   async updateProduct(
     @Param('id') id: number,
     @Body() body: any,
@@ -126,7 +134,7 @@ export class ProductsController {
         destination: './uploads',
         filename: (req, file, callback) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          callback(null, file.fieldname + '-' + uniqueSuffix + extname(file.originalname));
+          callback(null, 'image-' + uniqueSuffix + extname(file.originalname));
         },
       }),
     }),
@@ -159,20 +167,21 @@ export class ProductsController {
     // ✅ Manejar imagen
     const imageUrl = file ? `/uploads/${file.filename}` : undefined;
 
+    // ✅ Convertir campos booleanos (FormData no envía checkboxes desmarcados)
+    const ofreceLocal = body.ofreceLocal === 'true' || body.ofreceLocal === true;
+    const ofreceDelivery = body.ofreceDelivery === 'true' || body.ofreceDelivery === true;
+
     // ✅ Crear producto usando el servicio
     const product = await this.productsService.create({
       ...body,
       categoryIds,
       imageUrl,
+      ofreceLocal,
+      ofreceDelivery,
     });
 
-    // ✅ Devolver URL completa
-    return {
-      ...product,
-      imageUrl: product.imageUrl
-        ? `https://espacioboulevard.com${product.imageUrl}`
-        : null,
-    };
+    // ✅ Devolver producto con URL relativa (el frontend construirá la URL completa)
+    return product;
   }
 
 
